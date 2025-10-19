@@ -1,19 +1,60 @@
-<form action="{% url 'polls:vote' question.id %}" method="post">
-  {% csrf_token %}
-  <fieldset>
-    <legend><h1>{{ question.question_text }}</h1></legend>
-    {% if error_message %}
-    <p><strong>{{ error_message }}</strong></p>
-    {% endif %} {% for choice in question.choice_set.all %}
-    <input
-      type="radio"
-      name="choice"
-      id="choice{{ forloop.counter }}"
-      value="{{ choice.id }}"
-    />
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label
-    ><br />
-    {% endfor %}
-  </fieldset>
-  <input type="submit" value="Submit" />
-</form>
+{% extends "polls/base.html" %}
+
+{% block title %}Polls - Detalle{% endblock %}
+
+{% block content %}
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form action="{% url 'polls:vote' question.id %}" method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <fieldset>
+          <legend><h1 class="h5">{{ question.question_text }}</h1></legend>
+
+          {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+              <strong>{{ error_message }}</strong>
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            {% for choice in question.choice_set.all %}
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="choice"
+                  id="choice{{ forloop.counter }}"
+                  value="{{ choice.id }}"
+                  required
+                />
+                <label class="form-check-label" for="choice{{ forloop.counter }}">
+                  {{ choice.choice_text }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-secondary">Votar</button>
+          <a href="{% url 'polls:index' %}" class="btn btn-link">Volver</a>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Validación de formulario básica para mejorar accesibilidad
+    (function () {
+      'use strict'
+      var forms = document.querySelectorAll('.needs-validation')
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+  </script>
+{% endblock %}

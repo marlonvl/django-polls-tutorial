@@ -1,14 +1,82 @@
-{% extends "polls/base.html" %} {% block title %} Polls - Inicio {% endblock %}
-{% block content %} {% if latest_question_list %}
-<ul>
-  {% for question in latest_question_list %}
-  <li>
-    <a href="{% url 'polls:detail' question.id %}"
-      >{{question.question_text}}</a
-    >
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>No polls are available.</p>
-{% endif %} {% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+{% extends "polls/base.html" %}
+
+{% block title %}Polls - Inicio{% endblock %}
+
+{% block content %}
+  <section class="mb-4">
+    <div class="d-sm-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Encuestas recientes</h1>
+        <p class="text-muted mb-0">Listado de encuestas públicas. Diseño neutro y accesible.</p>
+      </div>
+
+      <form class="d-flex mt-3 mt-sm-0" role="search" action="" method="get" aria-label="Buscar encuestas">
+        <label for="q" class="visually-hidden">Buscar</label>
+        <input id="q" name="q" class="form-control form-control-sm me-2" type="search" placeholder="Buscar por texto..." aria-label="Buscar encuestas">
+        <button class="btn btn-outline-secondary btn-sm" type="submit" aria-label="Buscar">Buscar</button>
+      </form>
+    </div>
+
+    <div class="row g-3">
+      {% if latest_question_list %}
+        {% for question in latest_question_list %}
+          <article class="col-12 col-md-6 col-lg-4" aria-labelledby="q-title-{{ question.id }}">
+            <div class="card h-100 shadow-sm border-0">
+              <div class="card-body d-flex flex-column">
+                <h2 id="q-title-{{ question.id }}" class="h6 card-title">
+                  <a href="{% url 'polls:detail' question.id %}" class="stretched-link text-decoration-none text-body">
+                    {{ question.question_text }}
+                  </a>
+                </h2>
+
+                <p class="card-text text-muted small mb-3">
+                  {% if question.pub_date %}Publicado: {{ question.pub_date|date:"d M Y" }}{% endif %}
+                  &nbsp;·&nbsp;
+                  Opciones: {{ question.choice_set.count }}
+                </p>
+
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                  <a href="{% url 'polls:detail' question.id %}" class="btn btn-sm btn-outline-secondary" aria-label="Ver detalles de la encuesta {{ question.id }}">Ver</a>
+                  <span class="text-muted small">ID {{ question.id }}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="col-12">
+          <div class="alert alert-secondary mb-0" role="status" aria-live="polite">
+            No hay encuestas disponibles.
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% comment %} Placeholder para paginación si se añade más adelante {% endcomment %}
+    {% if is_paginated %}
+      <nav class="mt-4" aria-label="Paginación de encuestas">
+        <ul class="pagination justify-content-center pagination-sm">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Página anterior">Anterior</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+          {% endif %}
+
+          <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Página siguiente">Siguiente</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}
